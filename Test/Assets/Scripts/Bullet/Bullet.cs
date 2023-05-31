@@ -35,4 +35,13 @@ public class Bullet : MonoBehaviour
     {
         CancelInvoke();
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            gameObject.SetActive(false);
+            Debug.Log("Hit");
+        }
+    }
 }

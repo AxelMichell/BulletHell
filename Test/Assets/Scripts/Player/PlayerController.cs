@@ -13,17 +13,19 @@ public class PlayerController : MonoBehaviour
     float dashSpeed;
     [SerializeField]
     float dashTime;
+    bool canDash;
     Vector3 playerInput;
     Vector3 movePlayer;
     CharacterController player;
 
     public Camera mainCamera;
+    public GameObject playerCollider;
     Vector3 camForward;
     Vector3 camRight;
 
     private void Awake()
     {
-        instance = this; 
+        instance = this;
     }
 
     // Start is called before the first frame update
@@ -31,15 +33,17 @@ public class PlayerController : MonoBehaviour
     {
         player = GetComponent<CharacterController>();
         playerSpeed = 5;
+        player.detectCollisions = false;
     }
 
     // Update is called once per frame
     void Update()
     {
+
         horizontalMove = Input.GetAxis("Horizontal");
         verticalMove = Input.GetAxis("Vertical");
 
-        playerInput = new Vector3(horizontalMove, 0,verticalMove);
+        playerInput = new Vector3(horizontalMove, 0, verticalMove);
         playerInput = Vector3.ClampMagnitude(playerInput, 1);
 
         camDirection();
@@ -50,18 +54,32 @@ public class PlayerController : MonoBehaviour
 
         player.Move(playerInput * playerSpeed * Time.deltaTime);
 
-        if(Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && canDash)
         {
             StartCoroutine(Dash());
+        }
+
+        if (horizontalMove == 0 && verticalMove == 0)
+        {
+            PlayerManager.instance.changePlayerState(PlayerState.Idle);
+            canDash = false;
+        }
+        else if (horizontalMove != 0 || verticalMove != 0)
+        {
+            PlayerManager.instance.changePlayerState(PlayerState.Running);
+            canDash = true;
         }
     }
 
     public IEnumerator Dash()
     {
+        
         float startTime = Time.time;
 
-        while(Time.time < startTime + dashTime)
+
+        while (Time.time < startTime + dashTime)
         {
+            PlayerManager.instance.changePlayerState(PlayerState.Dash);
             player.Move(playerInput * dashSpeed * Time.deltaTime);
 
             yield return null;

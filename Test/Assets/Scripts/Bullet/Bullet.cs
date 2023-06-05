@@ -41,7 +41,7 @@ public class Bullet : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             gameObject.SetActive(false);
-            Debug.Log("Hit");
         }
     }
+
 }

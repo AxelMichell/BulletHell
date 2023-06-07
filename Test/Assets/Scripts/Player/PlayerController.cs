@@ -6,6 +6,8 @@ public class PlayerController : MonoBehaviour
 {
     public static PlayerController instance;
 
+    public bool isDead;
+
     float horizontalMove;
     float verticalMove;
     float playerSpeed;
@@ -13,6 +15,7 @@ public class PlayerController : MonoBehaviour
     float dashSpeed;
     [SerializeField]
     float dashTime;
+    float dashCooldown;
     bool canDash;
     Vector3 playerInput;
     Vector3 movePlayer;
@@ -34,46 +37,61 @@ public class PlayerController : MonoBehaviour
         player = GetComponent<CharacterController>();
         playerSpeed = 5;
         player.detectCollisions = false;
+        dashCooldown = 0.5f;
+        isDead = false;
     }
 
     // Update is called once per frame
     void Update()
     {
-
-        horizontalMove = Input.GetAxis("Horizontal");
-        verticalMove = Input.GetAxis("Vertical");
-
-        playerInput = new Vector3(horizontalMove, 0, verticalMove);
-        playerInput = Vector3.ClampMagnitude(playerInput, 1);
-
-        camDirection();
-
-        movePlayer = playerInput.x * camRight + playerInput.z * camForward;
-
-        player.transform.LookAt(player.transform.position + movePlayer);
-
-        player.Move(playerInput * playerSpeed * Time.deltaTime);
-
-        if (Input.GetMouseButtonDown(0) && canDash)
+        if(!isDead)
         {
-            StartCoroutine(Dash());
-        }
+            dashCooldown -= Time.deltaTime;
 
-        if (horizontalMove == 0 && verticalMove == 0)
-        {
-            PlayerManager.instance.changePlayerState(PlayerState.Idle);
-            canDash = false;
-        }
-        else if (horizontalMove != 0 || verticalMove != 0)
-        {
-            PlayerManager.instance.changePlayerState(PlayerState.Running);
-            canDash = true;
+            dashCooldown = Mathf.Clamp(dashCooldown, 0, 1);
+
+            horizontalMove = Input.GetAxis("Horizontal");
+            verticalMove = Input.GetAxis("Vertical");
+
+            playerInput = new Vector3(horizontalMove, 0, verticalMove);
+            playerInput = Vector3.ClampMagnitude(playerInput, 1);
+
+            camDirection();
+
+            movePlayer = playerInput.x * camRight + playerInput.z * camForward;
+
+            player.transform.LookAt(player.transform.position + movePlayer);
+
+            player.Move(playerInput * playerSpeed * Time.deltaTime);
+
+            if (Input.GetMouseButtonDown(0) && canDash)
+            {
+                StartCoroutine(Dash());
+                dashCooldown = 0.5f;
+            }
+
+            if (horizontalMove == 0 && verticalMove == 0)
+            {
+                PlayerManager.instance.changePlayerState(PlayerState.Idle);
+                canDash = false;
+                playerCollider.SetActive(true);
+            }
+            else if (horizontalMove != 0 || verticalMove != 0)
+            {
+                PlayerManager.instance.changePlayerState(PlayerState.Running);
+                playerCollider.SetActive(true);
+                canDash = false;
+                if (dashCooldown == 0)
+                {
+                    canDash = true;
+                }
+            }
         }
     }
 
     public IEnumerator Dash()
     {
-        
+
         float startTime = Time.time;
 
 
@@ -81,6 +99,7 @@ public class PlayerController : MonoBehaviour
         {
             PlayerManager.instance.changePlayerState(PlayerState.Dash);
             player.Move(playerInput * dashSpeed * Time.deltaTime);
+            playerCollider.SetActive(false);
 
             yield return null;
         }

@@ -8,6 +8,10 @@ public class PlayerManager : MonoBehaviour
 
     Animator animator;
     PlayerState playerState;
+    public PlayerController playerController;
+
+    int maxHealth = 100;
+    int currentHealth;
 
     void Awake()
     {
@@ -18,11 +22,13 @@ public class PlayerManager : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         playerState = PlayerState.None;
+        currentHealth = maxHealth;
     }
 
     void Update()
     {
-
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+        Debug.Log(currentHealth);
     }
 
     public void changePlayerState(PlayerState newState)
@@ -65,14 +71,17 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    public void TakeDamage(int amount)
     {
-        if (other.CompareTag("Bullet"))
+        currentHealth -= amount;
+
+        if(currentHealth <= 0)
         {
-            Debug.Log("Hit");
+            changePlayerState(PlayerState.Dead);
+            playerController.isDead = true;
+            playerController.playerCollider.SetActive(false);
         }
     }
-
 }
 
 public enum PlayerState

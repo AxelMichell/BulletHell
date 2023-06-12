@@ -24,7 +24,7 @@ public class RadialBulletController : MonoBehaviour
         secondBalls = false;
         thirdBalls = false;
 
-        canInvoke = true;
+        canInvoke = false;
 
         timer = 0;
     }

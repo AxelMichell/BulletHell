@@ -28,7 +28,7 @@ public class PlayerManager : MonoBehaviour
     void Update()
     {
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
-        Debug.Log(currentHealth);
+        //Debug.Log(currentHealth);
     }
 
     public void changePlayerState(PlayerState newState)

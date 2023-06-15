@@ -84,6 +84,14 @@ public class EnemyManager : MonoBehaviour
             
         }
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.gameObject.tag == ("PlayerBullet"))
+        {
+            TakeDamage(25);
+        }
+    }
 }
 
 public enum EnemyState

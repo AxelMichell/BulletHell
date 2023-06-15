@@ -26,6 +26,17 @@ public class PlayerController : MonoBehaviour
     Vector3 camForward;
     Vector3 camRight;
 
+    public Transform destino;
+    public Transform origen;
+    public float tiempo;
+    public GameObject bolaPrefab;
+    private Vector3 velocidadInicial;
+    public float shootCooldown;
+    public bool isShootCooldown;
+
+    float verticalVelocity;
+    private float gravity = 9.81f;
+
     private void Awake()
     {
         instance = this;
@@ -39,13 +50,18 @@ public class PlayerController : MonoBehaviour
         player.detectCollisions = false;
         dashCooldown = 0.5f;
         isDead = false;
+        isShootCooldown = false;
+        shootCooldown = Mathf.Clamp(shootCooldown, 0f, 0.5f);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(!isDead)
+        shootCooldown = Mathf.Clamp(shootCooldown, 0f, 0.5f);
+        if (!isDead)
         {
+            velocidadInicial = VelocidadInicialCalculo(destino.transform.position, origen.transform.position, tiempo);
+
             dashCooldown -= Time.deltaTime;
 
             dashCooldown = Mathf.Clamp(dashCooldown, 0, 1);
@@ -56,15 +72,28 @@ public class PlayerController : MonoBehaviour
             playerInput = new Vector3(horizontalMove, 0, verticalMove);
             playerInput = Vector3.ClampMagnitude(playerInput, 1);
 
-            camDirection();
-
             movePlayer = playerInput.x * camRight + playerInput.z * camForward;
 
             player.transform.LookAt(player.transform.position + movePlayer);
 
+            if (player.isGrounded)
+            {
+                verticalVelocity = -gravity * Time.deltaTime;
+            }
+            else
+            {
+                verticalVelocity -= gravity * Time.deltaTime;
+            }
+
+            playerInput.y = verticalVelocity;
+
             player.Move(playerInput * playerSpeed * Time.deltaTime);
 
-            if (Input.GetMouseButtonDown(0) && canDash)
+
+            camDirection();
+
+
+            if (Input.GetKeyDown(KeyCode.Space) && canDash)
             {
                 StartCoroutine(Dash());
                 dashCooldown = 0.5f;
@@ -86,6 +115,24 @@ public class PlayerController : MonoBehaviour
                     canDash = true;
                 }
             }
+
+            if(isShootCooldown)
+            {
+                shootCooldown -= Time.deltaTime;
+            }
+
+            if(shootCooldown <= 0)
+            {
+                isShootCooldown = false;
+            }
+
+            if (Input.GetMouseButtonDown(0) && shootCooldown <= 0)
+            {
+                Shoot();
+                shootCooldown = 0.5f;
+                isShootCooldown = true;
+            }
+
         }
     }
 
@@ -117,4 +164,23 @@ public class PlayerController : MonoBehaviour
         camRight = camRight.normalized;
 
     }
+
+
+        public void Shoot()
+        {
+            GameObject bola = Instantiate(bolaPrefab, origen.transform.position, Quaternion.identity);
+            bola.transform.Rotate(180, 0, 0);
+            bola.GetComponent<Rigidbody>().velocity = velocidadInicial;
+        }
+
+        public Vector3 VelocidadInicialCalculo(Vector3 destino, Vector3 origen, float tiempo)
+        {
+            Vector3 distancia = destino - origen;
+            float viX = distancia.x / tiempo;
+            float viY = distancia.y / tiempo + 0.5f * Mathf.Abs(Physics2D.gravity.y) * tiempo;
+            float viZ = distancia.z / tiempo;
+
+            Vector3 velocidadInicial = new Vector3(viX, viY, viZ);
+            return velocidadInicial;
+        }
 }

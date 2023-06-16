@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EnemyManager : MonoBehaviour
 {
@@ -12,6 +13,11 @@ public class EnemyManager : MonoBehaviour
 
     int maxEnemyHealth = 100;
     int currentEnemyHealth;
+
+    public Image enemyHealthBar;
+    float enemyFill = 1;
+
+    public AudioSource bgSong;
 
     void Awake()
     {
@@ -30,6 +36,11 @@ public class EnemyManager : MonoBehaviour
     {
         currentEnemyHealth = Mathf.Clamp(currentEnemyHealth, 0, maxEnemyHealth);
         Debug.Log(currentEnemyHealth);
+
+        if(currentEnemyHealth <= 50)
+        {
+            changeEnemyState(EnemyState.Scream);
+        }
     }
 
     public void changeEnemyState(EnemyState newState)
@@ -72,11 +83,16 @@ public class EnemyManager : MonoBehaviour
     public void idleState()
     {
         changeEnemyState(EnemyState.Idle);
+        PlayerController.instance.begin = true;
+        bgSong.Play();
     }
 
-    public void TakeDamage(int amount)
+    public void EnemyTakeDamage(int amount)
     {
         currentEnemyHealth -= amount;
+
+        enemyFill = currentEnemyHealth * 0.01f;
+        enemyHealthBar.fillAmount = enemyFill;
 
         if (currentEnemyHealth <= 0)
         {
@@ -89,7 +105,7 @@ public class EnemyManager : MonoBehaviour
     {
         if(other.gameObject.tag == ("PlayerBullet"))
         {
-            TakeDamage(25);
+            EnemyTakeDamage(1);
         }
     }
 }

@@ -9,8 +9,17 @@ public class ColliderManager : MonoBehaviour
     {
         if (other.CompareTag("Bullet"))
         {
-            PlayerManager.instance.TakeDamage(25);
+            PlayerManager.instance.PlayerTakeDamage(25);
+            Debug.Log("Hit");
+        }
+    }
 
+    private void OnTriggerStay(Collider other)
+    {
+        if(other.gameObject.tag == ("Lava"))
+        {
+            PlayerManager.instance.PlayerTakeDamage(1);
+            Debug.Log("BURN");
         }
     }
 }

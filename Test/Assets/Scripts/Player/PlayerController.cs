@@ -8,6 +8,8 @@ public class PlayerController : MonoBehaviour
 
     public bool isDead;
 
+
+    public Joystick joystickMove;
     float horizontalMove;
     float verticalMove;
     float playerSpeed;
@@ -33,9 +35,9 @@ public class PlayerController : MonoBehaviour
     private Vector3 velocidadInicial;
     public float shootCooldown;
     public bool isShootCooldown;
+    public bool begin;
+    public bool onButtonPressed;
 
-    float verticalVelocity;
-    private float gravity = 9.81f;
 
     private void Awake()
     {
@@ -51,6 +53,8 @@ public class PlayerController : MonoBehaviour
         dashCooldown = 0.5f;
         isDead = false;
         isShootCooldown = false;
+        begin = false;
+        onButtonPressed = false;
         shootCooldown = Mathf.Clamp(shootCooldown, 0f, 0.5f);
     }
 
@@ -66,8 +70,8 @@ public class PlayerController : MonoBehaviour
 
             dashCooldown = Mathf.Clamp(dashCooldown, 0, 1);
 
-            horizontalMove = Input.GetAxis("Horizontal");
-            verticalMove = Input.GetAxis("Vertical");
+            horizontalMove = joystickMove.Horizontal + Input.GetAxis("Horizontal");
+            verticalMove = joystickMove.Vertical + Input.GetAxis("Vertical");
 
             playerInput = new Vector3(horizontalMove, 0, verticalMove);
             playerInput = Vector3.ClampMagnitude(playerInput, 1);
@@ -76,28 +80,11 @@ public class PlayerController : MonoBehaviour
 
             player.transform.LookAt(player.transform.position + movePlayer);
 
-            if (player.isGrounded)
-            {
-                verticalVelocity = -gravity * Time.deltaTime;
-            }
-            else
-            {
-                verticalVelocity -= gravity * Time.deltaTime;
-            }
-
-            playerInput.y = verticalVelocity;
-
-            player.Move(playerInput * playerSpeed * Time.deltaTime);
-
-
             camDirection();
 
 
-            if (Input.GetKeyDown(KeyCode.Space) && canDash)
-            {
-                StartCoroutine(Dash());
-                dashCooldown = 0.5f;
-            }
+            player.Move(playerInput * playerSpeed * Time.deltaTime);
+
 
             if (horizontalMove == 0 && verticalMove == 0)
             {
@@ -116,23 +103,45 @@ public class PlayerController : MonoBehaviour
                 }
             }
 
-            if(isShootCooldown)
+            if (isShootCooldown)
             {
                 shootCooldown -= Time.deltaTime;
             }
 
-            if(shootCooldown <= 0)
+            if (shootCooldown <= 0)
             {
                 isShootCooldown = false;
             }
 
-            if (Input.GetMouseButtonDown(0) && shootCooldown <= 0)
+            if (onButtonPressed)
             {
-                Shoot();
-                shootCooldown = 0.5f;
-                isShootCooldown = true;
+                ShootButton();
             }
 
+        }
+    }
+
+    public void changeBoolean()
+    {
+        onButtonPressed = !onButtonPressed;
+    }
+
+    public void ShootButton()
+    {
+        if (shootCooldown <= 0 && begin)
+        {
+            Shoot();
+            shootCooldown = 0.5f;
+            isShootCooldown = true;
+        }
+    }
+
+    public void DashButton()
+    {
+        if (canDash)
+        {
+            StartCoroutine(Dash());
+            dashCooldown = 0.5f;
         }
     }
 
@@ -166,21 +175,21 @@ public class PlayerController : MonoBehaviour
     }
 
 
-        public void Shoot()
-        {
-            GameObject bola = Instantiate(bolaPrefab, origen.transform.position, Quaternion.identity);
-            bola.transform.Rotate(180, 0, 0);
-            bola.GetComponent<Rigidbody>().velocity = velocidadInicial;
-        }
+    public void Shoot()
+    {
+        GameObject bola = Instantiate(bolaPrefab, origen.transform.position, Quaternion.identity);
+        bola.transform.Rotate(180, 0, 0);
+        bola.GetComponent<Rigidbody>().velocity = velocidadInicial;
+    }
 
-        public Vector3 VelocidadInicialCalculo(Vector3 destino, Vector3 origen, float tiempo)
-        {
-            Vector3 distancia = destino - origen;
-            float viX = distancia.x / tiempo;
-            float viY = distancia.y / tiempo + 0.5f * Mathf.Abs(Physics2D.gravity.y) * tiempo;
-            float viZ = distancia.z / tiempo;
+    public Vector3 VelocidadInicialCalculo(Vector3 destino, Vector3 origen, float tiempo)
+    {
+        Vector3 distancia = destino - origen;
+        float viX = distancia.x / tiempo;
+        float viY = distancia.y / tiempo + 0.5f * Mathf.Abs(Physics2D.gravity.y) * tiempo;
+        float viZ = distancia.z / tiempo;
 
-            Vector3 velocidadInicial = new Vector3(viX, viY, viZ);
-            return velocidadInicial;
-        }
+        Vector3 velocidadInicial = new Vector3(viX, viY, viZ);
+        return velocidadInicial;
+    }
 }

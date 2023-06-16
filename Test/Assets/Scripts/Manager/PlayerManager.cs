@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerManager : MonoBehaviour
 {
@@ -12,6 +13,9 @@ public class PlayerManager : MonoBehaviour
 
     int maxHealth = 100;
     int currentHealth;
+
+    public Image playerHealthBar;
+    float playerFill = 1;
 
     void Awake()
     {
@@ -71,9 +75,12 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    public void TakeDamage(int amount)
+    public void PlayerTakeDamage(int amount)
     {
         currentHealth -= amount;
+
+        playerFill = currentHealth * 0.01f;
+        playerHealthBar.fillAmount = playerFill;
 
         if(currentHealth <= 0)
         {

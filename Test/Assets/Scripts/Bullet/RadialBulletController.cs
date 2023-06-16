@@ -27,42 +27,48 @@ public class RadialBulletController : MonoBehaviour
         canInvoke = false;
 
         timer = 0;
+        timerPerInvoke = 2f;
     }
 
     private void Update()
     {
-        timerPerInvoke += Time.deltaTime;
-
-        if(timerPerInvoke >= 2f)
-        {
-            CanInvoke();
-            timer = 0;
-            timerPerInvoke = 0;
-        }
-
-        if (canInvoke)
+        if (PlayerController.instance.begin)
         {
 
-            timer += Time.deltaTime;
+            timerPerInvoke += Time.deltaTime;
 
-            if (firstBalls && timer >= 0.5f)
+            if (timerPerInvoke >= 2f)
             {
-                Invoke("SpawnProjectile180", 0f);
-                timer = 0f;
+                CanInvoke();
+                timer = 0;
+                timerPerInvoke = 0;
             }
 
-            if (secondBalls && timer >= 0.5f)
+            if (canInvoke)
             {
-                Invoke("SpawnProjectile170", 0f);
-                timer = 0f;
-            }
 
-            if (thirdBalls && timer >= 0.5f)
-            {
-                Invoke("SpawnProjectile180Again", 0f);
-                timer = 0f;
+                timer += Time.deltaTime;
+
+                if (firstBalls && timer >= 0.5f)
+                {
+                    Invoke("SpawnProjectile180", 0f);
+                    timer = 0f;
+                }
+
+                if (secondBalls && timer >= 0.5f)
+                {
+                    Invoke("SpawnProjectile170", 0f);
+                    timer = 0f;
+                }
+
+                if (thirdBalls && timer >= 0.5f)
+                {
+                    Invoke("SpawnProjectile180Again", 0f);
+                    timer = 0f;
+                }
             }
         }
+
     }
 
 

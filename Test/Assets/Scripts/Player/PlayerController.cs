@@ -36,6 +36,7 @@ public class PlayerController : MonoBehaviour
     public float shootCooldown;
     public bool isShootCooldown;
     public bool begin;
+    public bool win;
     public bool onButtonPressed;
 
 
@@ -54,6 +55,7 @@ public class PlayerController : MonoBehaviour
         isDead = false;
         isShootCooldown = false;
         begin = false;
+        win = false;
         onButtonPressed = false;
         shootCooldown = Mathf.Clamp(shootCooldown, 0f, 0.5f);
     }
@@ -62,7 +64,11 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         shootCooldown = Mathf.Clamp(shootCooldown, 0f, 0.5f);
-        if (!isDead)
+        if (isDead || win)
+        {
+            return;
+        }
+        else
         {
             velocidadInicial = VelocidadInicialCalculo(destino.transform.position, origen.transform.position, tiempo);
 
@@ -138,7 +144,7 @@ public class PlayerController : MonoBehaviour
 
     public void DashButton()
     {
-        if (canDash)
+        if (canDash && !isDead)
         {
             StartCoroutine(Dash());
             dashCooldown = 0.5f;

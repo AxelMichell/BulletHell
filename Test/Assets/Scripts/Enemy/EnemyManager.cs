@@ -12,7 +12,7 @@ public class EnemyManager : MonoBehaviour
 
 
     int maxEnemyHealth = 100;
-    int currentEnemyHealth;
+    public int currentEnemyHealth;
 
     public Image enemyHealthBar;
     float enemyFill = 1;
@@ -36,11 +36,6 @@ public class EnemyManager : MonoBehaviour
     {
         currentEnemyHealth = Mathf.Clamp(currentEnemyHealth, 0, maxEnemyHealth);
         Debug.Log(currentEnemyHealth);
-
-        if(currentEnemyHealth <= 50)
-        {
-            changeEnemyState(EnemyState.Scream);
-        }
     }
 
     public void changeEnemyState(EnemyState newState)
@@ -105,7 +100,7 @@ public class EnemyManager : MonoBehaviour
     {
         if(other.gameObject.tag == ("PlayerBullet"))
         {
-            EnemyTakeDamage(1);
+            EnemyTakeDamage(2);
         }
     }
 }

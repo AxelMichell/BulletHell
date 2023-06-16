@@ -12,7 +12,7 @@ public class PlayerManager : MonoBehaviour
     public PlayerController playerController;
 
     int maxHealth = 100;
-    int currentHealth;
+    public int currentHealth;
 
     public Image playerHealthBar;
     float playerFill = 1;
